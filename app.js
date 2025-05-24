@@ -24,7 +24,7 @@ app.use(express.json({ limit: '5mb' }));
 app.use(express.urlencoded({ limit: '5mb', extended: true }));
 app.use(cors({
   origin: [
-    "https://chetanexpenseease.netlify.app",
+    "https://chetanagrohub.netlify.app",
     "http://localhost:3000"
   ],
   credentials: true
