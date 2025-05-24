@@ -126,16 +126,17 @@ const getUserProfile = asyncHandler(async (req, res) => {
 const updateUserProfile = asyncHandler(async (req, res) => {
   try {
     let options = {
-            provider: 'openstreetmap'
-        };
+      provider: 'openstreetmap'
+    };
     let geoCoder = nodeGeocoder(options);
-    const getCordinates = geoCoder.geocode(req.body.address).then(
-            response => {
-                return response[0]
-            }).catch((err) => {
-                console.log(err);
-            });
-    const latAndLong = await getCordinates
+    
+    const getCoordinates = geoCoder.geocode(req.body.address).then(
+      response => {
+        return response[0]
+      }).catch((err) => {
+        console.log(err);
+      });
+    const latAndLong = await getCoordinates
 
     // Initialize updates object
     const updates = {
@@ -153,13 +154,12 @@ const updateUserProfile = asyncHandler(async (req, res) => {
       updates.password = req.body.password;
     }
 
-    // Handle image upload if a file is present in the form data
-    if (req.file) {
-      // The `req.file.filename` will be available due to the use of multer or other middleware for file upload
-      updates.image = `/img/users/${req.file.filename}`;
-
-      // Check if the user already has an image and delete the old image if necessary
-      if (req.user.image && req.user.image !== 'default.jpg') {
+    // Handle image URL if provided in the request body
+    if (req.body.image) {
+      updates.image = req.body.image;
+      
+      // Check if the user already has an image and it's not the default
+      if (req.user.image && req.user.image !== 'default.jpg' && !req.user.image.startsWith('http')) {
         const oldImagePath = path.join(process.cwd(), 'public', req.user.image);
         if (fs.existsSync(oldImagePath)) {
           fs.unlinkSync(oldImagePath);
@@ -180,13 +180,6 @@ const updateUserProfile = asyncHandler(async (req, res) => {
       data: { user: updatedUser },
     });
   } catch (error) {
-    // Clean up uploaded file if an error occurs
-    if (req.file) {
-      const filePath = path.join(uploadDir, req.file.filename);
-      if (fs.existsSync(filePath)) {
-        fs.unlinkSync(filePath);
-      }
-    }
     res.status(400).json({
       status: 'fail',
       message: error.message,
