@@ -12,13 +12,14 @@ import {
     updateUser
 } from '../controllers/userController.js'
 import { protect, admin } from './../middleware/authMiddleware.js'
-import { uploadUserPhoto } from '../middleware/uploadUserPhoto.js';
+import  upload  from '../middleware/uploadUserPhoto.js';
 router.route('/').post(registerUser).get(getUsers)
 router.post('/login', authUser)
 router
     .route('/profile')
     .get(protect, getUserProfile)
-    .put(protect, uploadUserPhoto, updateUserProfile);
+    .put(protect, upload.single('image'), updateUserProfile);
+
 router
     .route('/:id')
     .delete(protect, admin, deleteUser)
